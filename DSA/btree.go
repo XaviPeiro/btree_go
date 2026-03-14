@@ -28,29 +28,40 @@ func main() {
 	}
 
 	key := "33"
-	res := get_element(db_path, key)
-	println("key: %s, value: %s", key, string(res))
+	id, value := search_element(db_path, key)
+	println("key: %s, value: %s", id, value)
 
 }
 
-func get_element(db string, key string) string {
+func search_element(db string, key string) (string, string) {
+	var _iterations uint8 = 0
+
 	file, _ := os.OpenFile(db, os.O_RDONLY, 0)
 
 	file.Seek(0, 0)
-
 	reader := bufio.NewReader(file)
 
-	line, err := reader.ReadString('\n')
-	if err != nil {
-		log.Fatal(err)
+	var id, value string = "", ""
+	for _iterations < 10 {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Iterations number: %u", _iterations)
+		fmt.Println(line)
+		fmt.Println("-------------")
+		parts := strings.Split(line, ":")
+		id, value = parts[0], parts[1]
+
+		if id == key {
+			break
+		}
+
+		_iterations++
 	}
 
-	fmt.Println(line)
-	parts := strings.Split(line, ":")
-
-	//if
-
-	return parts[1]
+	return id, value
 }
 
 func add_element(db string, key string, val []byte) {
