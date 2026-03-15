@@ -9,17 +9,8 @@ import (
 	"strings"
 )
 
-//if err != nil {
-//	if os.IsExist(err) {
-//		log.Println("file already exists")
-//		return
-//	}
-//	log.Fatal(err)
-//}
-//
-
 func main() {
-	db_path := "btree/wena.db"
+	db_path := "btreedb/index1/wena.db"
 
 	clear_btree(db_path)
 	for i := 0; i < 100; i++ {
@@ -30,6 +21,9 @@ func main() {
 	key := "33"
 	id, value := search_element(db_path, key)
 	println("key: %s, value: %s", id, value)
+}
+
+func search_element_in_memory(node_content string) string {
 
 }
 
@@ -55,6 +49,8 @@ func search_element(db string, key string) (string, string) {
 		id, value = parts[0], parts[1]
 
 		if id == key {
+			//if pointer keep_going
+			//else return
 			break
 		}
 
@@ -79,6 +75,7 @@ func add_element(db string, key string, val []byte) {
 			log.Fatal(err)
 		}
 	}(file)
+
 }
 
 func clear_btree(path string) {
