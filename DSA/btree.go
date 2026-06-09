@@ -1,8 +1,9 @@
 package main
 
-type Key = string
+// type Key = string
+type Key = int // GEneralise later 
 type Value = string
-
+type Index = int
 /*
 T = Minimum degree (minimum number of children).
 max children = 2*T
@@ -16,7 +17,16 @@ const T = 2
 type Node struct {
 	keys []int `json:"keys,omitempty"`
 	leaf bool  `json:"leaf,omitempty"`
-	children []Node 
+	children []*Node
+}
+
+func NewNode() *Node{
+	node := Node{
+		keys: make([]int, 2*T-1),
+		leaf: true,
+		children: make([]*Node, 2*T),	
+	}
+	return &node
 }
 
 type BTree struct {
@@ -33,7 +43,7 @@ func NewBTree() *BTree {
 	root := Node{
 		keys: make([]int, 2*T-1),
 		leaf: true,
-		children: make([]Node, 2*T), // Q? What is the point of pre-allocating? I do not remember the problem with dynamic allocation in GO
+		children: make([]*Node, 2*T), // Q? What is the point of pre-allocating? I do not remember the problem with dynamic allocation in GO
 	}
 
 	tree := BTree{
@@ -42,49 +52,38 @@ func NewBTree() *BTree {
 
 	return &tree
 }
+func (b *BTree) Insert(key Key) bool {
+	node, index := b.Search(key, &b.root)
+	if node == nil {
+		// is leaf and key not found
+		// node.keys = [:index] + key + [index:]  
+		node.keys = append(node.keys, )
+	} else {
 
-func (b *BTree) Search(target_key Key, starting_node *Node) (Key, Value) {
-
-	// Missing default value for starting_node
-	if starting_node == nil {
-		starting_node = &b.root
 	}
-
-	// if starting_node == nil {
-	// 	node := b.root
-	// }
-
-	/*
-	logic:
-		node = root
-		node_key = nil
-		c = 0
-		while c<len(node.keys) and node_key < target_key:
-			node_key = keys[c]
-			c++
-
-		if node_key == target_key:
-			return node_key
-		else:
-			if node_key.leaf is false:
-				search(target_key, node_key.child)
-			else:
-				return nil
-
-	*/
-	return "", ""
-}
-
-func (b BTree) Insert(key Key, value Value) bool {
-	// Spot the position in which should be inserted
-	/*
-		If keys < 2*T-1 ->  insert normally
-		else
-			(recursive) split node in 2, update parents.
-	*/
-
 	return false
 }
+
+func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index) {
+	node := *starting_node
+	c := 0
+	
+	for c<len(node.keys) && node.keys[c] < target_key{
+		c++
+	}  
+
+	if c < len(node.keys) && node.keys[c] == target_key{
+		return &node, c
+	}
+	
+	if node.leaf == true {
+		return nil, c
+	} else {
+		return b.Search(target_key, node.children[c])
+	}
+}
+
+
 
 //func main() {
 //}
