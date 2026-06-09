@@ -52,6 +52,7 @@ func NewBTree() *BTree {
 
 	return &tree
 }
+
 func (b *BTree) Insert(key Key) bool {
 	node, index := b.Search(key, &b.root)
 	if node == nil {
