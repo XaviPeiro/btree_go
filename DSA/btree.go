@@ -60,8 +60,14 @@ func NewBTree() *BTree {
 
 	return &tree
 }
+
 func (b *BTree) InsertInNodeIndex(node *Node, index Index, key Key) (bool, string) {
+	// This probably better be a Node method
     if len(node.keys) >= MaxKeys {
+
+		/*
+		
+		*/
 		// We should rebalance, but isn't implemented yet
 		panic("Insert, node full should be split. Not implemented yet")
     }
@@ -80,28 +86,19 @@ func (b *BTree) InsertInNodeIndex(node *Node, index Index, key Key) (bool, strin
 		node.keys[i] = to_insert
 		to_insert = tmp
 	}
+	node.keys = append(node.keys, to_insert)
 	return true, ""
 }
 
+// func rebalance
+
 func (b *BTree) InsertInNode(node *Node, key Key) (bool, string) {
-    if len(node.keys) >= MaxKeys {
-		// We should rebalance, but isn't implemented yet
-		panic("Insert, node full should be split. Not implemented yet")
-    }
-
-	if len(node.keys) == 0 {
-		node.keys = append(node.keys, key)
-		return true, ""
+	var index Index = 0
+	for index < len(node.keys) && node.keys[index]<=key {
+		index++
 	}
 
-	to_insert := key
-	for i, k :=  range node.keys {
-		if k>to_insert {
-			node.keys[i] = to_insert
-			to_insert = k
-		} 
-	}
-	return true, ""
+	return b.InsertInNodeIndex(node, index, key)
 }
 
 
