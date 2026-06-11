@@ -13,5 +13,8 @@ This is project meant to learn about data-structures, data-science and also gola
 - Keep it concise, aim for high-density information messages while keeping them understandable.
 - Do not jump preemptively on the user prompts, do not rush into code, disclose any information about what is wrong or good, etc... if you haven't been asked for. E.g.: 'Let's work on btree.go and tests_b_tree.go' it is just informational for you to get the context, anything else. 
 
+# Commands
+I will list a few commands/marks and what it should mean to you. If you found them at the begining or the end of a prompt, apply it.
 
-# Tool
+- ':dk:' : Explain deeply, in detail, with some deep reflections, important use-cases and known caveats.  Also provide high-quality sources to learn in detail or expand.
+- ':ks:' : Means 'keep it short' be schematic, spend small amount of tokens and provide a straight-forward answer.

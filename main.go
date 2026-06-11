@@ -1,4 +1,4 @@
-package main2
+package main
 
 import (
 	"fmt"
@@ -17,10 +17,27 @@ func main() {
 		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
 		fmt.Println("i =", 100/i)
 	}
-	fmt.Println(pep())
+	fmt.Println(slices())
 
 }
 
-func pep() int {
-	return 32
+func slices() int {
+	var a1 []int
+	a1 = []int{1, 2, 3, 4 ,5}
+
+	fmt.Println(a1[2:])
+	fmt.Println(a1[1:])
+	copy(a1[0:1], a1[4:])	
+	fmt.Println(a1)
+	b2 := [10]int{}
+	c1 := make([]int, 0, 10)
+	fmt.Println(b2)
+	fmt.Println(len(b2))
+	fmt.Println(c1)
+
+	pp := 33
+	xx := &pp
+	println(*xx+3)
+
+	return 0
 }
