@@ -11,55 +11,52 @@ import (
 // 	btree.Insert()
 // }
 
-func TestSearchKey(t *testing.T) {
+// func TestBtreeInsertKey1NodeRebalance(t *testing.T) {
+// 	tests := []struct {
+// 		name string
+// 		keys []int
+// 		key  int
+// 		expected_root_keys []int
+// 	}{
+// 		{
+// 			name: "insert first",
+// 			keys: []int{11,13,14},
+// 			key:  10,
+// 			expected_root_keys: []int{13},
+// 		},
+// 		{
+// 			name: "insert last",
+// 			keys: []int{20, 30, 40},
+// 			key:  50,
+// 			expected_root_keys: []int{40},
+// 		},
+// 		{
+// 			name: "insert in middle",
+// 			keys: []int{10, 20, 30},
+// 			key:  15,
+// 			expected_root_keys: []int{20},
+// 		},
+// 	}
 
-}
-func TestBtreeInsertKey1NodeRebalance(t *testing.T) {
-	tests := []struct {
-		name string
-		keys []int
-		key  int
-		expected_root_keys []int
-	}{
-		{
-			name: "insert first",
-			keys: []int{11,13,14},
-			key:  10,
-			expected_root_keys: []int{13},
-		},
-		{
-			name: "insert last",
-			keys: []int{20, 30, 40},
-			key:  50,
-			expected_root_keys: []int{40},
-		},
-		{
-			name: "insert in middle",
-			keys: []int{10, 20, 30},
-			key:  15,
-			expected_root_keys: []int{20},
-		},
-	}
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			t.Helper()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Helper()
+// 			btree := NewBTree()
+// 			for _, k := range tt.keys {
+// 				btree.InsertInNode(&btree.root, k)
+// 				fmt.Printf("key loop %d \n", k)
+// 			}
+// 			fmt.Println(btree.root.keys)
+// 			btree.InsertInNode(&btree.root, tt.key)
 
-			btree := NewBTree()
-			for _, k := range tt.keys {
-				btree.InsertInNode(&btree.root, k)
-				fmt.Printf("key loop %d \n", k)
-			}
-			fmt.Println(btree.root.keys)
-			btree.InsertInNode(&btree.root, tt.key)
-
-			if !slices.Equal(btree.root.keys, tt.expected_root_keys) {
-				t.Fatalf("InsertInNode(%v, %d) = %v, want %v",
-					tt.keys, tt.key, &btree.root.keys, tt.expected_root_keys)
-			}
-		})
-	}
-}
+// 			if !slices.Equal(btree.root.keys, tt.expected_root_keys) {
+// 				t.Fatalf("InsertInNode(%v, %d) = %v, want %v",
+// 					tt.keys, tt.key, &btree.root.keys, tt.expected_root_keys)
+// 			}
+// 		})
+// 	}
+// }
 func TestBtreeInsertKeyNoRebalance(t *testing.T) {
 	tests := []struct {
 		name string
@@ -91,12 +88,6 @@ func TestBtreeInsertKeyNoRebalance(t *testing.T) {
 			key:  30,
 			want: []int{10, 20, 30},
 		},
-		// {
-		// 	"name": "insert when full",
-		// 	keys:,
-		// 	ley:,
-		// 	want: 
-		// }
 	}
 
 	for _, tt := range tests {

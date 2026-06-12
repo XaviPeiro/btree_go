@@ -53,12 +53,7 @@ const MaxKeys = 2*T-1
 const MinKeys = T-1
 
 // TODO: optimization -> keys array
-type Node struct {
-	keys []int `json:"keys,omitempty"`
-	leaf bool  `json:"leaf,omitempty"`
-	children []*Node
-	// is_root bool
-}
+
 
 // func (n *Node) Insert(key Key) 
 
