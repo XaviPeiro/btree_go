@@ -57,15 +57,7 @@ const MinKeys = T-1
 
 // func (n *Node) Insert(key Key) 
 
-func NewNode() *Node{
-	node := Node{
-		keys: make([]int, 0, MaxKeys),
-		leaf: true,
-		children: make([]*Node, 0, MaxChildren),
 
-	}
-	return &node
-}
 type BTree struct {
 	root Node
 }
