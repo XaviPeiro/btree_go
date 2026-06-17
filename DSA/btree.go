@@ -1,5 +1,11 @@
 package main
 
+import (
+	"container/list"
+	"fmt"
+	"math"
+)
+
 /*
 BTree
 ---
@@ -26,11 +32,11 @@ All leaves shall be at the very same level.
 Always at the bottom of the tree.
 When a node is full (2T-1 K) is divided by 2 and the remaining one is promoted to the parent (depth-1).
 This is done recursively.
-=> 
+=>
 - Ensures all leafs are at the very same level (so same depth).
 - *The filters adapt to the number of keys*; in the case of a monotonic one the keys promoted will the lastly entered,
 increasing the gap btw 'em (greater filter) and promoting them in concordance with the inserts.*
-I SHOULD ANALYZE THIS BETTER, the only clear thing I see is that it adapt to the 'hottest trend' by promoting them up. 
+I SHOULD ANALYZE THIS BETTER, the only clear thing I see is that it adapt to the 'hottest trend' by promoting them up.
 For random keys as UUID it may be problematic.
 
 */
@@ -165,6 +171,39 @@ func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found
 }
 
 
+func (b *BTree) String() string {
+	var result [][]int = [][]int{}
+	// result = append(result, 1)
 
+	q := list.New()
+	q.PushBack([]*Node{&b.root})
+
+	lvl := 0.0
+	// BFS
+	for q.Len() > 0 {
+		lvl++
+
+		var level_values []int = make([]int, int(math.Pow(T, lvl)))
+		var lvl_res []int = []int{}
+
+		n_in_lvl := q.Front().Value.([]*Node)
+		
+		for _, n := range n_in_lvl {
+			for _, child_node := range n.children {
+				// nodes
+				// q.PushBack(child_node)
+				n_in_lvl = append(n_in_lvl, child_node)
+			}
+			// keys
+			lvl_res = append(lvl_res, n.keys...)
+		}
+
+		q.PushBack(level_values)
+		result = append(result, lvl_res)
+	} 
+
+	// stringify
+	return fmt.Sprint(result)
+}
 //func main() {
 //}
