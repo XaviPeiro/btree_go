@@ -126,6 +126,7 @@ func (b *BTree) InsertInNode(node *Node, key Key) (bool, string) {
 		index++
 	}
 
+	// Early abstraction: too many abstractions, not justified in addition.
 	return b.InsertInNodeIndex(node, index, key)
 }
 
@@ -198,7 +199,6 @@ func (b *BTree) String() string {
 		for _, node := range nodes_in_lvl {
 			for _, child_node := range node.children {
 				// nodes
-				// q.PushBack(child_node)
 				next_lvl_values = append(next_lvl_values, child_node)
 			}
 
