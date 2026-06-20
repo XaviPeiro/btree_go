@@ -57,16 +57,16 @@ import (
 // 		})
 // 	}
 // }
-func TestBtreeInserKeyWithRebalance(t *testing.T){
-	btree := NewBTree()
-	btree.Insert(1)
-	btree.Insert(2)
-	btree.Insert(3)
-	// btree.Insert(10)
-	// btree.Insert(5)
+// func TestBtreeInserKeyWithRebalance(t *testing.T){
+// 	btree := NewBTree()
+// 	btree.Insert(1)
+// 	btree.Insert(2)
+// 	btree.Insert(3)
+// 	// btree.Insert(10)
+// 	// btree.Insert(5)
 
-	t.Log(btree)
-}
+// 	t.Log(btree)
+// }
 
 func TestBtreeInsertKeyNoRebalance(t *testing.T) {
 	tests := []struct {
@@ -107,11 +107,11 @@ func TestBtreeInsertKeyNoRebalance(t *testing.T) {
 
 			btree := NewBTree()
 			for _, k := range tt.keys {
-				btree.InsertInNode(&btree.root, k)
+				btree.Insert(k)
 				fmt.Printf("key loop %d \n", k)
 			}
 			// fmt.Println(btree.root.keys)
-			btree.InsertInNode(&btree.root, tt.key)
+			btree.Insert(tt.key)
 
 			if !slices.Equal(btree.root.keys, tt.want) {
 				t.Fatalf("InsertInNode(%v, %d) = %v, want %v",

@@ -3,6 +3,7 @@ package main
 import (
 	"container/list"
 	"fmt"
+	"image/color/palette"
 	"math"
 )
 
@@ -53,7 +54,7 @@ max children = 2*T
 Minimum number of keys: T-1
 Minimum number of keys: 2*T-1
 */
-const T = 2 
+const T = 2
 const MaxChildren = 2*T
 const MaxKeys = 2*T-1
 const MinKeys = T-1
@@ -88,24 +89,14 @@ func NewBTree() *BTree {
 	return &tree
 }
 
-func (b *BTree) InsertInNodeIndex(node *Node, index Index, key Key) (bool, string) {
-	// This probably better be a Node method
-    if len(node.keys) >= MaxKeys {
-
-		/*
-		When full rebalance in 2 nodes: maxk=2T-1 mink=T-1 -> solo una posibilidad, 2 nodos	
-
-		*/
-		// We should rebalance, but isn't implemented yet
-		panic("Insert, node full should be split. Not implemented yet")
-    }
-
-	if len(node.keys) == 0 {
-		node.keys = append(node.keys, key)
-		return true, ""
-	}
+func (b *BTree) insertInNodeIndex(node *Node, index Index, key Key) (bool, string) {
+	// if len(node.keys) == 0 {
+	// 	node.keys = append(node.keys, key)
+	// 	return true, ""
+	// }
 
 	to_insert := key
+	// slice len 0, cap set -> should not loop if no item
 	for i, k := range node.keys {
 		if i < index{
 			continue
@@ -120,25 +111,38 @@ func (b *BTree) InsertInNodeIndex(node *Node, index Index, key Key) (bool, strin
 
 // func rebalance
 
-func (b *BTree) InsertInNode(node *Node, key Key) (bool, string) {
-	var index Index = 0
-	for index < len(node.keys) && node.keys[index]<=key {
-		index++
-	}
-
-	// Early abstraction: too many abstractions, not justified in addition.
-	return b.InsertInNodeIndex(node, index, key)
-}
-
 
 func (b *BTree) Insert(key Key) (bool, string) {
-	node, _, found := b.Search(key, &b.root)
-	if found == false {
-		b.InsertInNode(node, key)
-		return true, ""
+	node, index, found := b.Search(key, &b.root)
+	if found == true {
+		return false, "Key must be unique"
 	}
 
-	return false, "Key must be unique"
+	// At this point we that it does not exist and where it should be.
+	// Due to search, it should be always a leaf, however double-check just in case.
+	if node.leaf == false {
+		panic("ERRROR: BITCH: This it not a leaf, we cannot insert in here!")
+	}
+
+
+	// We set as an invariant that there is always place, so we split the node after insert if it is full.
+	has_inserted, err := b.insertInNodeIndex(node, index, key)
+    if len(node.keys) < MaxKeys {
+		// Inserted, everything is cool, nothing to do.
+		return has_inserted, err
+	}
+
+	// We have inserted and now the node is full (of keys)
+	// La chicha; we need to rebalance the tree
+	/*
+		When full rebalance in 2 nodes: maxk=2T-1 mink=T-1 -> solo una posibilidad, 2 nodos	
+	*/
+
+	// Divide keys in 2: 1/2 current, 1/2 new sibling, remaining (always 1) to the parent.
+	// TODO: Instead of having ekeys and node apart I could have just nodes with left and right.!
+	left_ks, parentk, right_ks := node.keys[:(T-1)], node.keys[T-1], node.keys[T:(2*T)-1] 
+	panic("Insert, node full should be split. Not implemented yet")
+
 }
 
 func (btree *BTree) SearchForInsert() {
@@ -154,20 +158,20 @@ func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found
 		
 	*/
 	node := starting_node
-	c := 0
+	current_index := 0
 	
-	for c<len(node.keys) && node.keys[c] < target_key{
-		c++
+	for current_index<len(node.keys) && node.keys[current_index] < target_key{
+		current_index++
 	}  
 
-	if c < len(node.keys) && node.keys[c] == target_key{
-		return node, c, true
+	if current_index < len(node.keys) && node.keys[current_index] == target_key{
+		return node, current_index, true
 	}
 	
 	if node.leaf == true {
-		return node, c, false
+		return node, current_index, false
 	} else {
-		return b.Search(target_key, node.children[c])
+		return b.Search(target_key, node.children[current_index])
 	}
 }
 
