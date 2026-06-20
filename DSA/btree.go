@@ -172,6 +172,10 @@ func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found
 
 
 func (b *BTree) String() string {
+	/*
+	This is just a representation to easily check if our btree is correct.
+
+	*/
 	var result [][]int = [][]int{}
 	// result = append(result, 1)
 
@@ -183,22 +187,26 @@ func (b *BTree) String() string {
 	for q.Len() > 0 {
 		lvl++
 
-		var level_values []int = make([]int, int(math.Pow(T, lvl)))
+		var next_lvl_values []*Node = make([]*Node, 0, int(math.Pow(T, lvl)))
 		var lvl_res []int = []int{}
+		// var next_lvl_values []*Node = make([]*Node, 0)
 
-		n_in_lvl := q.Front().Value.([]*Node)
+		nodes_in_lvl := q.Front().Value.([]*Node)
 		
-		for _, n := range n_in_lvl {
-			for _, child_node := range n.children {
+		for _, node := range nodes_in_lvl {
+			for _, child_node := range node.children {
 				// nodes
 				// q.PushBack(child_node)
-				n_in_lvl = append(n_in_lvl, child_node)
+				next_lvl_values = append(next_lvl_values, child_node)
 			}
+
 			// keys
-			lvl_res = append(lvl_res, n.keys...)
+			lvl_res = append(lvl_res, node.keys...)
 		}
 
-		q.PushBack(level_values)
+		if len(next_lvl_values) > 0{
+			q.PushBack(next_lvl_values)
+		}
 		result = append(result, lvl_res)
 	} 
 
