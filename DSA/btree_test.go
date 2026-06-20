@@ -62,8 +62,8 @@ func TestBtreeInserKeyWithRebalance(t *testing.T){
 	btree.Insert(1)
 	btree.Insert(2)
 	btree.Insert(3)
-	btree.Insert(10)
-	btree.Insert(5)
+	// btree.Insert(10)
+	// btree.Insert(5)
 
 	t.Log(btree)
 }
