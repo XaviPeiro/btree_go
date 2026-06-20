@@ -176,6 +176,7 @@ func (b *BTree) String() string {
 	/*
 	This is just a representation to easily check if our btree is correct.
 
+	The aim is BFS + controlling each level; simple.
 	*/
 	var result [][]int = [][]int{}
 	// result = append(result, 1)
