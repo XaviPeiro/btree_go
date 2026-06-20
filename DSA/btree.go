@@ -152,7 +152,7 @@ func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found
 		- found: it is already present or not
 		
 	*/
-	node := *starting_node
+	node := starting_node
 	c := 0
 	
 	for c<len(node.keys) && node.keys[c] < target_key{
@@ -160,11 +160,11 @@ func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found
 	}  
 
 	if c < len(node.keys) && node.keys[c] == target_key{
-		return &node, c, true
+		return node, c, true
 	}
 	
 	if node.leaf == true {
-		return &node, c, false
+		return node, c, false
 	} else {
 		return b.Search(target_key, node.children[c])
 	}
@@ -191,7 +191,9 @@ func (b *BTree) String() string {
 		var lvl_res []int = []int{}
 		// var next_lvl_values []*Node = make([]*Node, 0)
 
-		nodes_in_lvl := q.Front().Value.([]*Node)
+		front := q.Front()
+		nodes_in_lvl := front.Value.([]*Node)
+		q.Remove(front)
 		
 		for _, node := range nodes_in_lvl {
 			for _, child_node := range node.children {
