@@ -89,31 +89,11 @@ func NewBTree() *BTree {
 	return &tree
 }
 
-func (b *BTree) insertInNodeIndex(node *Node, index Index, key Key) (bool, string) {
-	// if len(node.keys) == 0 {
-	// 	node.keys = append(node.keys, key)
-	// 	return true, ""
-	// }
-
-	to_insert := key
-	// slice len 0, cap set -> should not loop if no item
-	for i, k := range node.keys {
-		if i < index{
-			continue
-		}
-		tmp := k
-		node.keys[i] = to_insert
-		to_insert = tmp
-	}
-	node.keys = append(node.keys, to_insert)
-	return true, ""
-}
-
 // func rebalance
 
 
 func (b *BTree) Insert(key Key) (bool, string) {
-	node, index, found := b.Search(key, &b.root)
+	node, _, found := b.Search(key, &b.root)
 	if found == true {
 		return false, "Key must be unique"
 	}
@@ -126,7 +106,7 @@ func (b *BTree) Insert(key Key) (bool, string) {
 
 
 	// We set as an invariant that there is always place, so we split the node after insert if it is full.
-	has_inserted, err := b.insertInNodeIndex(node, index, key)
+	has_inserted, err := node.insertInNodeIndex(key)
     if len(node.keys) < MaxKeys {
 		// Inserted, everything is cool, nothing to do.
 		return has_inserted, err
@@ -142,10 +122,6 @@ func (b *BTree) Insert(key Key) (bool, string) {
 	// TODO: Instead of having ekeys and node apart I could have just nodes with left and right.!
 	left_ks, parentk, right_ks := node.keys[:(T-1)], node.keys[T-1], node.keys[T:(2*T)-1] 
 	panic("Insert, node full should be split. Not implemented yet")
-
-}
-
-func (btree *BTree) SearchForInsert() {
 
 }
 
