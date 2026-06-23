@@ -4,15 +4,25 @@ type Node struct {
 	keys []int `json:"keys,omitempty"`
 	leaf bool  `json:"leaf,omitempty"`
 	children []*Node
+	parent *Node
 	// is_root bool
 }
 
 
-func NewNode(leaf bool) *Node{
+func NewNode(leaf bool, keys []int, children []*Node, parent *Node) *Node{
+	if len(children) == 0 {
+		children = make([]*Node, 0, MaxChildren)
+	}
+
+	if  len(keys) == 0 {
+		keys = make([]int, 0, MaxKeys)
+	}
+
 	node := Node{
-		keys: make([]int, 0, MaxKeys),
+		keys: keys,
 		leaf: leaf,
-		children: make([]*Node, 0, MaxChildren),
+		children: children,
+		parent: parent,
 	}
 	return &node
 }

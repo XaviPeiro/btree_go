@@ -3,7 +3,6 @@ package main
 import (
 	"container/list"
 	"fmt"
-	"image/color/palette"
 	"math"
 )
 
@@ -119,8 +118,30 @@ func (b *BTree) Insert(key Key) (bool, string) {
 	*/
 
 	// Divide keys in 2: 1/2 current, 1/2 new sibling, remaining (always 1) to the parent.
-	// TODO: Instead of having ekeys and node apart I could have just nodes with left and right.!
-	left_ks, parentk, right_ks := node.keys[:(T-1)], node.keys[T-1], node.keys[T:(2*T)-1] 
+	// TODO: Instead of having keys and node apart I could have just nodes with left and right.!
+	left_ks, mid_k, right_ks := node.keys[:(T-1)], node.keys[T-1], node.keys[T:(2*T)-1]
+	
+	// If leaf it will be empty
+	left_children, right_children := node.children, node.children 
+	if node.leaf == false {
+		left_children, right_children := node.children[:T], node.children[T:2*T]
+	}
+
+	if node.parent == nil {
+		// is root
+	}
+
+	left_node := NewNode(node.leaf, left_ks, left_children, node.parent)
+	right_node := NewNode(node.leaf, right_ks, right_children, node.parent)
+
+	for index, key := range node.parent.keys {
+
+	}		
+	for node_parent_child := node.parent.children[index:] {
+
+	}
+	// upper_node := NewNode(false, mid_k, []*Node{left_node, right_node}, node.parent)
+
 	panic("Insert, node full should be split. Not implemented yet")
 
 }
