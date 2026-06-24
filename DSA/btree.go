@@ -58,11 +58,6 @@ const MaxChildren = 2*T
 const MaxKeys = 2*T-1
 const MinKeys = T-1
 
-// TODO: optimization -> keys array
-
-
-// func (n *Node) Insert(key Key) 
-
 
 type BTree struct {
 	root Node
@@ -91,40 +86,41 @@ func NewBTree() *BTree {
 // func rebalance
 
 
-func (b *BTree) Insert(key Key) (bool, string) {
-	node, _, found := b.Search(key, &b.root)
+func (b *BTree) Insert(ins_key Key) (bool, string) {
+	node, _, found := b.Search(ins_key, &b.root)
 	if found == true {
 		return false, "Key must be unique"
 	}
 
 	// At this point we that it does not exist and where it should be.
 	// Due to search, it should be always a leaf, however double-check just in case.
-	if node.leaf == false {
-		panic("ERRROR: BITCH: This it not a leaf, we cannot insert in here!")
-	}
-
+	// if node.leaf == false {
+	// 	panic("ERROR: BITCH: This it not a leaf, we cannot insert in here!")
+	// }
 
 	// We set as an invariant that there is always place, so we split the node after insert if it is full.
-	has_inserted, err := node.insertInNodeIndex(key)
+	has_inserted, err := node.insertInNodeIndex(ins_key)
     if len(node.keys) < MaxKeys {
 		// Inserted, everything is cool, nothing to do.
 		return has_inserted, err
 	}
 
 	// We have inserted and now the node is full (of keys)
-	// La chicha; we need to rebalance the tree
-	/*
-		When full rebalance in 2 nodes: maxk=2T-1 mink=T-1 -> solo una posibilidad, 2 nodos	
-	*/
 
+
+	panic("Insert, node full should be split. Not implemented yet")
+}
+
+func (b *BTree) upStreamInsert(full_node *Node) {
+	node := full_node
+	// When full rebalance in 2 nodes: maxk=2T-1 mink=T-1 -> solo una posibilidad, 2 nodos	
 	// Divide keys in 2: 1/2 current, 1/2 new sibling, remaining (always 1) to the parent.
-	// TODO: Instead of having keys and node apart I could have just nodes with left and right.!
 	left_ks, mid_k, right_ks := node.keys[:(T-1)], node.keys[T-1], node.keys[T:(2*T)-1]
 	
-	// If leaf it will be empty
+	// Divide children: If leaf it will be empty
 	left_children, right_children := node.children, node.children 
 	if node.leaf == false {
-		left_children, right_children := node.children[:T], node.children[T:2*T]
+		left_children, right_children = node.children[:T], node.children[T:2*T]
 	}
 
 	if node.parent == nil {
@@ -134,16 +130,16 @@ func (b *BTree) Insert(key Key) (bool, string) {
 	left_node := NewNode(node.leaf, left_ks, left_children, node.parent)
 	right_node := NewNode(node.leaf, right_ks, right_children, node.parent)
 
-	for index, key := range node.parent.keys {
+	insert_index_at_parent := sortedInsert(node.parent.keys, mid_k)
+	insertAtIndex(node.parent.children, left_node, insert_index_at_parent)
+	insertAtIndex(node.parent.children, right_node, insert_index_at_parent+1)
 
-	}		
-	for node_parent_child := node.parent.children[index:] {
+	if len(node.parent.keys) == MaxKeys {
+		b.upStreamInsert(node.parent)
+	} 
 
-	}
-	// upper_node := NewNode(false, mid_k, []*Node{left_node, right_node}, node.parent)
-
-	panic("Insert, node full should be split. Not implemented yet")
-
+	// This should be destroyed (by the GC at some point)
+	node.parent = nil
 }
 
 func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found) {

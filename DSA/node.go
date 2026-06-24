@@ -26,19 +26,22 @@ func NewNode(leaf bool, keys []int, children []*Node, parent *Node) *Node{
 	}
 	return &node
 }
+// copy()
+
 
 func (node *Node) insertInNodeIndex(key Key) (bool, string) {
-	to_insert := key
-	// slice len 0, cap set -> should not loop if no item
-	for i, k := range node.keys {
-		if k <= key {
-			continue
-		}
-		tmp := k
-		node.keys[i] = to_insert
-		to_insert = tmp
-	}
-	node.keys = append(node.keys, to_insert)
+	// to_insert := key
+	// // slice len 0, cap set -> should not loop if no item
+	// for i, k := range node.keys {
+	// 	if k <= key {
+	// 		continue
+	// 	}
+	// 	tmp := k
+	// 	node.keys[i] = to_insert
+	// 	to_insert = tmp
+	// }
+	// node.keys = append(node.keys, to_insert)
+	sortedInsert(node.keys, key)
 	return true, ""
 }
 
