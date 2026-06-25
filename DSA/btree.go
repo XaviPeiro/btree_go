@@ -111,7 +111,11 @@ func (b *BTree) Insert(ins_key Key) (bool, string) {
 	panic("Insert, node full should be split. Not implemented yet")
 }
 
-func (b *BTree) upStreamInsert(full_node *Node) {
+func (b *BTree) upStreamInsert(full_node *Node) (bool, string){
+	/*
+		TODO: Let's explore how to concurrently update the tree in a safe manner  
+	*/
+
 	node := full_node
 	// When full rebalance in 2 nodes: maxk=2T-1 mink=T-1 -> solo una posibilidad, 2 nodos	
 	// Divide keys in 2: 1/2 current, 1/2 new sibling, remaining (always 1) to the parent.
@@ -123,23 +127,27 @@ func (b *BTree) upStreamInsert(full_node *Node) {
 		left_children, right_children = node.children[:T], node.children[T:2*T]
 	}
 
-	if node.parent == nil {
+	parent_node := node.parent
+	if parent_node == nil {
 		// is root
+		parent_node = NewNode(false, []int{}, []*Node(nil), nil)
 	}
 
-	left_node := NewNode(node.leaf, left_ks, left_children, node.parent)
-	right_node := NewNode(node.leaf, right_ks, right_children, node.parent)
+	left_node := NewNode(node.leaf, left_ks, left_children, parent_node)
+	right_node := NewNode(node.leaf, right_ks, right_children, parent_node)
 
-	insert_index_at_parent := sortedInsert(node.parent.keys, mid_k)
-	insertAtIndex(node.parent.children, left_node, insert_index_at_parent)
-	insertAtIndex(node.parent.children, right_node, insert_index_at_parent+1)
+	insert_index_at_parent := sortedInsert(parent_node.keys, mid_k)
+	insertAtIndex(parent_node.children, left_node, insert_index_at_parent)
+	insertAtIndex(parent_node.children, right_node, insert_index_at_parent+1)
 
 	if len(node.parent.keys) == MaxKeys {
-		b.upStreamInsert(node.parent)
+		b.upStreamInsert(parent_node)
 	} 
 
 	// This should be destroyed (by the GC at some point)
 	node.parent = nil
+
+	return true, ""
 }
 
 func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found) {
@@ -170,6 +178,11 @@ func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found
 
 
 func (b *BTree) String() string {
+	// stringify
+	return fmt.Sprint(b.repr())
+}
+
+func (b *BTree) repr() [][]int {
 	/*
 	This is just a representation to easily check if our btree is correct.
 
@@ -188,7 +201,6 @@ func (b *BTree) String() string {
 
 		var next_lvl_values []*Node = make([]*Node, 0, int(math.Pow(T, lvl)))
 		var lvl_res []int = []int{}
-		// var next_lvl_values []*Node = make([]*Node, 0)
 
 		front := q.Front()
 		nodes_in_lvl := front.Value.([]*Node)
@@ -201,6 +213,7 @@ func (b *BTree) String() string {
 			}
 
 			// keys
+			fmt.Printf("%v", node.keys)
 			lvl_res = append(lvl_res, node.keys...)
 		}
 
@@ -209,9 +222,5 @@ func (b *BTree) String() string {
 		}
 		result = append(result, lvl_res)
 	} 
-
-	// stringify
-	return fmt.Sprint(result)
+	return result
 }
-//func main() {
-//}
