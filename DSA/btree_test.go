@@ -17,7 +17,7 @@ func TestBtreeInsertKey1NodeRebalance(t *testing.T) {
 			name: "insert first",
 			keys: []int{11,13},
 			key:  10,
-			expected_root_keys: []int{13, 10, 11},
+			expected_root_keys: []int{11, 10, 13},
 		},
 		// {
 		// 	name: "insert last",
@@ -46,11 +46,13 @@ func TestBtreeInsertKey1NodeRebalance(t *testing.T) {
 			btree.Insert(tt.key)
 
 			fmt.Printf("root nodes%d \n", btree.root.keys)
+			flat := slices.Concat(btree.repr()...)  
 
-			if !slices.Equal(btree.root.keys, tt.expected_root_keys) {
+			if !slices.Equal(flat, tt.expected_root_keys) {
 				t.Fatalf("InsertInNode(%v, %d) = %v, want %v",
-					tt.keys, tt.key, btree.repr(), tt.expected_root_keys)
+					tt.keys, tt.key, flat, tt.expected_root_keys)
 			}
+			
 		})
 	}
 }

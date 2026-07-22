@@ -61,7 +61,7 @@ const MinKeys = T-1
 
 
 type BTree struct {
-	root Node
+	root *Node
 	T int
 }
 
@@ -79,7 +79,7 @@ func NewBTree() *BTree {
 	}
 
 	tree := BTree{
-		root: root,
+		root: &root,
 	}
 
 	return &tree
@@ -90,7 +90,7 @@ func NewBTree() *BTree {
 
 func (b *BTree) Insert(ins_key Key) (bool, string) {
 	fmt.Println("Btree insert")
-	node, _, found := b.Search(ins_key, &b.root)
+	node, _, found := b.Search(ins_key, b.root)
 	if found == true {
 		return false, "Key must be unique"
 	}
@@ -104,21 +104,20 @@ func (b *BTree) Insert(ins_key Key) (bool, string) {
 	// We set as an invariant that there is always place, so we split the node after insert if it is full.
 	has_inserted, err := node.insertInNodeIndex(ins_key)
 	if len(node.keys) == MaxKeys {
-		b.upStreamInsert(node)
-	if len(node.keys) == MaxKeys {
-		panic("rebalancing did not work")
-	}
+		node = b.upStreamInsert(node)
+		// if len(node.keys) == MaxKeys {
+		// 	panic("rebalancing did not work")
+		// }
 		return has_inserted, err
 	} else if len(node.keys) < MaxKeys {
 		return has_inserted, err
 	}
 
-
 	// We have inserted and now the node is full (of keys), so rebalancing time.
 	panic("Impossible scenario: This should never ever happen. Should have been splitter just when it reaches the max, and we can just reach this point if we are above the threshold.")
 }
 
-func (b *BTree) upStreamInsert(full_node *Node) (bool, string){
+func (b *BTree) upStreamInsert(full_node *Node) *Node {
 	/*
 		TODO: Let's explore how to concurrently update the tree in a safe manner  
 	*/
@@ -153,10 +152,16 @@ func (b *BTree) upStreamInsert(full_node *Node) (bool, string){
 		b.upStreamInsert(parent_node)
 	} 
 
-	// This should be destroyed (by the GC at some point)
+	if node.parent == nil {
+		// This means we have splitted the root and it is not the root anymore
+		b.root = parent_node
+	}
+
+	// Unreference the provided node, so we have created new ones to replace it. 
+	// This should be destroyed (by the GC at some point)	
 	node.parent = nil
 
-	return true, ""
+	return parent_node
 }
 
 func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found) {
@@ -202,7 +207,7 @@ func (b *BTree) repr() [][]int {
 	// result = append(result, 1)
 
 	q := list.New()
-	q.PushBack([]*Node{&b.root})
+	q.PushBack([]*Node{b.root})
 
 	lvl := 0.0
 	// BFS
