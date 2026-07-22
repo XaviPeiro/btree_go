@@ -6,6 +6,48 @@ import (
 	"fmt"
 )
 
+func TestBtreeInsertKeyNodeRebalances(t *testing.T) {
+	tests := []struct {
+		name string
+		keys []int
+		key  int
+		expected_root_keys [][]int
+	}{
+		{
+			name: "More than 1 rebalance",
+			keys: []int{1,2,3,4},
+			key:  5,
+			expected_root_keys: [][]int{{2,4},{1},{3},{5}}, //R[2,4], [1], [3], [5]
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Helper()
+
+			btree := NewBTree()
+			for _, k := range tt.keys {
+				btree.Insert(k)
+				fmt.Printf("key loop %d \n", k)
+			}
+			fmt.Println(btree.root.keys)
+			btree.Insert(tt.key)
+
+			fmt.Printf("root nodes%d \n", btree.root.keys)
+
+equal := slices.EqualFunc(btree.repr(), tt.expected_root_keys, func(x, y []int) bool {
+	return slices.Equal(x, y)
+})
+
+			if !equal {
+				t.Fatalf("InsertInNode(%v, %d) = %v, want %v",
+					tt.keys, tt.key, btree.repr(), tt.expected_root_keys)
+			}
+
+		})
+	}
+}
+
 func TestBtreeInsertKey1NodeRebalance(t *testing.T) {
 	tests := []struct {
 		name string
@@ -19,18 +61,24 @@ func TestBtreeInsertKey1NodeRebalance(t *testing.T) {
 			key:  10,
 			expected_root_keys: []int{11, 10, 13},
 		},
-		// {
-		// 	name: "insert last",
-		// 	keys: []int{20, 30, 40},
-		// 	key:  55,
-		// 	expected_root_keys: []int{30, 20, 40, 55},
-		// },
-		// {
-		// 	name: "insert in middle",
-		// 	keys: []int{1,2,10},
-		// 	key:  15,
-		// 	expected_root_keys: []int{2, 1,10,15},
-		// },
+		{
+			name: "insert last",
+			keys: []int{20, 30},
+			key:  55,
+			expected_root_keys: []int{30, 20, 55},
+		},
+		{
+			name: "insert in middle",
+			keys: []int{1,22},
+			key:  15,
+			expected_root_keys: []int{15, 1, 22},
+		},
+		{
+			name: "More than 1 rebalance",
+			keys: []int{1,2,3,4},
+			key:  5,
+			expected_root_keys: []int{2,4,1,3,5}, //R[2,4], [1], [3], [5]
+		},
 	}
 
 	for _, tt := range tests {
@@ -52,7 +100,7 @@ func TestBtreeInsertKey1NodeRebalance(t *testing.T) {
 				t.Fatalf("InsertInNode(%v, %d) = %v, want %v",
 					tt.keys, tt.key, flat, tt.expected_root_keys)
 			}
-			
+
 		})
 	}
 }

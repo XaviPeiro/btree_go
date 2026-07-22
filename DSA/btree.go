@@ -3,6 +3,7 @@ package main
 import (
 	"container/list"
 	"fmt"
+	"iter"
 	"math"
 )
 
@@ -143,6 +144,11 @@ func (b *BTree) upStreamInsert(full_node *Node) *Node {
 	right_node := NewNode(node.leaf, right_ks, right_children, parent_node)
 
 	insert_index_at_parent := sortedInsert(&parent_node.keys, mid_k)
+	
+	/* 
+	This is rewriting the reference to the full node 
+	(it was located at &parent_node.children[insert_index_at_parent])
+	*/
 	fmt.Printf("parent index %v \n", insert_index_at_parent)
 	insertAtIndex(&parent_node.children, left_node, insert_index_at_parent)
 	fmt.Printf("parent children %v \n", parent_node.children)
@@ -190,10 +196,63 @@ func (b *BTree) Search(target_key Key, starting_node *Node) (*Node, Index, Found
 	}
 }
 
+// func (b *BTree) Metadata() {
+// 	metadata := make(map[string]any, 25)
+
+// 	metadata["number_of_nodes"] = 
+
+// 	return metadata
+// }
 
 func (b *BTree) String() string {
 	// stringify
 	return fmt.Sprint(b.repr())
+}
+
+
+
+// Private
+
+func (b *BTree) itBFS() iter.Seq2[*Node, float64] {
+	return func (yield func (*Node, float64) bool)  { // node and level
+			
+		/*
+		The aim is BFS + controlling each level; simple.
+		*/
+		q := list.New()
+		q.PushBack([]*Node{b.root})
+
+		lvl := 0.0
+		// BFS
+		for q.Len() > 0 {
+			lvl++
+
+			var next_lvl_values []*Node = make([]*Node, 0, int(math.Pow(T, lvl)))
+			// var lvl_res []int = []int{}
+
+			front := q.Front()
+			nodes_in_lvl := front.Value.([]*Node)
+			q.Remove(front)
+			
+			for _, node := range nodes_in_lvl {
+				for _, child_node := range node.children {
+					// nodes
+					next_lvl_values = append(next_lvl_values, child_node)
+				}
+
+				// TODO: El yield contiene lo que meto en for range?
+				if !yield(node, lvl){
+					return 
+				}
+				
+			}
+
+			if len(next_lvl_values) > 0 {
+				q.PushBack(next_lvl_values)
+			}
+		} 
+	}
+
 }
 
 func (b *BTree) repr() [][]int {
@@ -228,6 +287,7 @@ func (b *BTree) repr() [][]int {
 				next_lvl_values = append(next_lvl_values, child_node)
 			}
 
+			
 			// keys
 			fmt.Printf("repr keys: %v", node.keys)
 			lvl_res = append(lvl_res, node.keys...)
@@ -240,3 +300,5 @@ func (b *BTree) repr() [][]int {
 	} 
 	return result
 }
+
+
