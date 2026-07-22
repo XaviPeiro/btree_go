@@ -1,28 +1,30 @@
 package main
 
 import "cmp"
-// type Index int
-func sortedInsert[T cmp.Ordered](collection []T, value T) Index {
+
+func sortedInsert[T cmp.Ordered](collection *[]T, value T) Index {
 	var i Index
 	var v T
 
-	collection = append(collection, v)
-	for i, v = range collection{
+	*collection = append(*collection, v)
+	s := *collection
+
+	for i, v = range s{
 		if v > value {
 			break
 		}
 	}
-
-	copy(collection[i+1:], collection[i:])
-	collection[i] = value
+	copy(s[i+1:], s[i:])
+	s[i] = value
 
 	return i
 }
 
-func insertAtIndex[T any](collection []T, value T, i Index){
+func insertAtIndex[T any](collection *[]T, value T, i Index){
 	var v T
-	collection = append(collection, v)
+	*collection = append(*collection, v)
+	s := *collection
 	
-	copy(collection[i+1:], collection[i:])
-	collection[i] = value
+	copy(s[i+1:], s[i:])
+	s[i] = value
 }

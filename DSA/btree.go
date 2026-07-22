@@ -53,6 +53,7 @@ max children = 2*T
 Minimum number of keys: T-1
 Minimum number of keys: 2*T-1
 */
+// TODO: that shit conf-able
 const T = 2
 const MaxChildren = 2*T
 const MaxKeys = 2*T-1
@@ -61,6 +62,7 @@ const MinKeys = T-1
 
 type BTree struct {
 	root Node
+	T int
 }
 
 func NewBTree() *BTree {
@@ -87,6 +89,7 @@ func NewBTree() *BTree {
 
 
 func (b *BTree) Insert(ins_key Key) (bool, string) {
+	fmt.Println("Btree insert")
 	node, _, found := b.Search(ins_key, &b.root)
 	if found == true {
 		return false, "Key must be unique"
@@ -100,15 +103,19 @@ func (b *BTree) Insert(ins_key Key) (bool, string) {
 
 	// We set as an invariant that there is always place, so we split the node after insert if it is full.
 	has_inserted, err := node.insertInNodeIndex(ins_key)
-    if len(node.keys) < MaxKeys {
-		// Inserted, everything is cool, nothing to do.
+	if len(node.keys) == MaxKeys {
+		b.upStreamInsert(node)
+	if len(node.keys) == MaxKeys {
+		panic("rebalancing did not work")
+	}
+		return has_inserted, err
+	} else if len(node.keys) < MaxKeys {
 		return has_inserted, err
 	}
 
-	// We have inserted and now the node is full (of keys)
 
-
-	panic("Insert, node full should be split. Not implemented yet")
+	// We have inserted and now the node is full (of keys), so rebalancing time.
+	panic("Impossible scenario: This should never ever happen. Should have been splitter just when it reaches the max, and we can just reach this point if we are above the threshold.")
 }
 
 func (b *BTree) upStreamInsert(full_node *Node) (bool, string){
@@ -119,12 +126,12 @@ func (b *BTree) upStreamInsert(full_node *Node) (bool, string){
 	node := full_node
 	// When full rebalance in 2 nodes: maxk=2T-1 mink=T-1 -> solo una posibilidad, 2 nodos	
 	// Divide keys in 2: 1/2 current, 1/2 new sibling, remaining (always 1) to the parent.
-	left_ks, mid_k, right_ks := node.keys[:(T-1)], node.keys[T-1], node.keys[T:(2*T)-1]
+	left_ks, mid_k, right_ks := node.keys[:(T-1)], node.keys[T-1], node.keys[T:]
 	
 	// Divide children: If leaf it will be empty
-	left_children, right_children := node.children, node.children 
+	left_children, right_children := node.children, node.children
 	if node.leaf == false {
-		left_children, right_children = node.children[:T], node.children[T:2*T]
+		left_children, right_children = node.children[:T], node.children[T:]
 	}
 
 	parent_node := node.parent
@@ -136,11 +143,13 @@ func (b *BTree) upStreamInsert(full_node *Node) (bool, string){
 	left_node := NewNode(node.leaf, left_ks, left_children, parent_node)
 	right_node := NewNode(node.leaf, right_ks, right_children, parent_node)
 
-	insert_index_at_parent := sortedInsert(parent_node.keys, mid_k)
-	insertAtIndex(parent_node.children, left_node, insert_index_at_parent)
-	insertAtIndex(parent_node.children, right_node, insert_index_at_parent+1)
+	insert_index_at_parent := sortedInsert(&parent_node.keys, mid_k)
+	fmt.Printf("parent index %v \n", insert_index_at_parent)
+	insertAtIndex(&parent_node.children, left_node, insert_index_at_parent)
+	fmt.Printf("parent children %v \n", parent_node.children)
+	insertAtIndex(&parent_node.children, right_node, insert_index_at_parent+1)
 
-	if len(node.parent.keys) == MaxKeys {
+	if node.parent != nil && len(node.parent.keys) == MaxKeys {
 		b.upStreamInsert(parent_node)
 	} 
 
@@ -187,6 +196,7 @@ func (b *BTree) repr() [][]int {
 	This is just a representation to easily check if our btree is correct.
 
 	The aim is BFS + controlling each level; simple.
+
 	*/
 	var result [][]int = [][]int{}
 	// result = append(result, 1)
@@ -196,6 +206,7 @@ func (b *BTree) repr() [][]int {
 
 	lvl := 0.0
 	// BFS
+	// this should be simplified, the next_lvl_values appears to be a useless layer
 	for q.Len() > 0 {
 		lvl++
 
@@ -213,11 +224,11 @@ func (b *BTree) repr() [][]int {
 			}
 
 			// keys
-			fmt.Printf("%v", node.keys)
+			fmt.Printf("repr keys: %v", node.keys)
 			lvl_res = append(lvl_res, node.keys...)
 		}
 
-		if len(next_lvl_values) > 0{
+		if len(next_lvl_values) > 0 {
 			q.PushBack(next_lvl_values)
 		}
 		result = append(result, lvl_res)

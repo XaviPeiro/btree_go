@@ -41,13 +41,13 @@ func (node *Node) insertInNodeIndex(key Key) (bool, string) {
 	// 	to_insert = tmp
 	// }
 	// node.keys = append(node.keys, to_insert)
-	sortedInsert(node.keys, key)
+	sortedInsert(&(node.keys), key)
 	return true, ""
 }
 
 
 // Node version 2
-
+// ###################
 type Node2 struct {
 	leaf bool
 	keys []*Element
