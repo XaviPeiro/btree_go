@@ -93,16 +93,12 @@ func (b *BTree) Insert(ins_key Key) (bool, string) {
 	fmt.Println("Btree insert")
 	node, _, found := b.Search(ins_key, b.root)
 	if found == true {
+		// TODO
 		return false, "Key must be unique"
 	}
 
-	// At this point we that it does not exist and where it should be.
-	// Due to search, it should be always a leaf, however double-check just in case.
-	// if node.leaf == false {
-	// 	panic("ERROR: BITCH: This it not a leaf, we cannot insert in here!")
-	// }
-
-	// We set as an invariant that there is always place, so we split the node after insert if it is full.
+	// We set as an invariant that there is always place, so we split the node 
+	// after insert if it is full.
 	has_inserted, err := node.insertInNodeIndex(ins_key)
 	if len(node.keys) == MaxKeys {
 		node = b.upStreamInsert(node)
@@ -144,13 +140,19 @@ func (b *BTree) upStreamInsert(full_node *Node) *Node {
 	right_node := NewNode(node.leaf, right_ks, right_children, parent_node)
 
 	insert_index_at_parent := sortedInsert(&parent_node.keys, mid_k)
-	
 	/* 
 	This is rewriting the reference to the full node 
 	(it was located at &parent_node.children[insert_index_at_parent])
 	*/
 	fmt.Printf("parent index %v \n", insert_index_at_parent)
-	insertAtIndex(&parent_node.children, left_node, insert_index_at_parent)
+
+	// Replace the pointer to the old full node by th new left one.
+	if len(parent_node.children) == 0 {
+		parent_node.children = append(parent_node.children, left_node)	
+	} else{
+		parent_node.children[insert_index_at_parent] = left_node
+	}
+
 	fmt.Printf("parent children %v \n", parent_node.children)
 	insertAtIndex(&parent_node.children, right_node, insert_index_at_parent+1)
 
@@ -275,7 +277,7 @@ func (b *BTree) repr() [][]int {
 		lvl++
 
 		var next_lvl_values []*Node = make([]*Node, 0, int(math.Pow(T, lvl)))
-		var lvl_res []int = []int{}
+		var lvl_res [][]int = [][]int{}
 
 		front := q.Front()
 		nodes_in_lvl := front.Value.([]*Node)
@@ -290,13 +292,13 @@ func (b *BTree) repr() [][]int {
 			
 			// keys
 			fmt.Printf("repr keys: %v", node.keys)
-			lvl_res = append(lvl_res, node.keys...)
+			lvl_res = append(lvl_res, node.keys)
 		}
 
 		if len(next_lvl_values) > 0 {
 			q.PushBack(next_lvl_values)
 		}
-		result = append(result, lvl_res)
+		result = append(result, lvl_res...)
 	} 
 	return result
 }

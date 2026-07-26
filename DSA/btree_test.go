@@ -14,10 +14,22 @@ func TestBtreeInsertKeyNodeRebalances(t *testing.T) {
 		expected_root_keys [][]int
 	}{
 		{
-			name: "More than 1 rebalance",
+			name: "More than 1 rebalance monotonic right",
 			keys: []int{1,2,3,4},
 			key:  5,
 			expected_root_keys: [][]int{{2,4},{1},{3},{5}}, //R[2,4], [1], [3], [5]
+		},
+		{
+			name: "More than 1 rebalance left",
+			keys: []int{10,20,30,40,0,},
+			key:  5,
+			expected_root_keys: [][]int{{5,20},{0}, {10}, {30,40},},
+		},
+		{
+			name: "4 rebalances", // 50 triggers 2 rebalances, bottom and root
+			keys: []int{10,20,30,40,0,5},
+			key:  50,
+			expected_root_keys: [][]int{{20}, {5}, {40}, {0}, {10}, {30}, {50},},
 		},
 	}
 
@@ -35,15 +47,20 @@ func TestBtreeInsertKeyNodeRebalances(t *testing.T) {
 
 			fmt.Printf("root nodes%d \n", btree.root.keys)
 
-equal := slices.EqualFunc(btree.repr(), tt.expected_root_keys, func(x, y []int) bool {
-	return slices.Equal(x, y)
-})
+			equal := slices.EqualFunc(
+				btree.repr(),
+				tt.expected_root_keys, 
+				func(x, y []int) bool {return slices.Equal(x, y)},
+			)
 
 			if !equal {
-				t.Fatalf("InsertInNode(%v, %d) = %v, want %v",
-					tt.keys, tt.key, btree.repr(), tt.expected_root_keys)
+				t.Fatalf(
+					"InsertInNode(%v, %d) = %v, want %v",
+					tt.keys,
+					tt.key, btree.repr(),
+					tt.expected_root_keys,
+				)
 			}
-
 		})
 	}
 }
